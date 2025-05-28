@@ -1,0 +1,17 @@
+# Assumptions
+1. Pruebas:
+   - Se priorizo una implementacion rapida para una POC, sin implementar pruebas unitarias.
+
+2. Seguridad y Autenticación:
+   - Por simplicidad, no se maneja autenticación de usuarios
+
+3. Persistencia:
+   - Se almacena en PostgreSQL el modelo relacional de los usuarios y sus seguidores.
+   - Redis cumple la funcion de cache y por simplicidad, se la utiliza como MessageQueue para la notificacion de tweets para el feed.
+
+4. Mejoras a futuro
+   - Probablemente se utilice un modelo no relacional para almacenar los tweets
+   - Con casos de uso que lo justifiquen, se podria utilziar un modelo de grafos como Neo4J para consultas mas interesantes sobre relaciones de usuarios.
+   - Reemplazar redis por un Message broker mas apropiado como RabbitMQ.
+
+
