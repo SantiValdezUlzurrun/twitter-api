@@ -51,6 +51,22 @@ func (h *Handler) Delete(c *gin.Context) {
 	c.JSON(http.StatusOK, gin.H{"message": fmt.Sprintf("Tweet %d deleted", id)})
 }
 
+func (h *Handler) GetFeed(c *gin.Context) {
+	id, err := stouint(c.Param("id"))
+	if err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
+		return
+	}
+
+	tweet, err := h.service.GetFeed(c.Request.Context(), id)
+	if err != nil {
+		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		return
+	}
+
+	c.JSON(http.StatusOK, tweet)
+}
+
 func stouint(s string) (uint, error) {
 	u64, err := strconv.ParseUint(s, 10, 64)
 	if err != nil {

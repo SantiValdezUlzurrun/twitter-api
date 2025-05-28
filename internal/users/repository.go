@@ -58,8 +58,8 @@ func (r *repository) Follow(ctx context.Context, userID, followerID uint) error 
 	}
 
 	pipe := r.redis.TxPipeline()
-	pipe.SAdd(ctx, fmt.Sprintf("following:%d", followerID), userID)
-	pipe.SAdd(ctx, fmt.Sprintf("followers:%d", userID), followerID)
+	pipe.SAdd(ctx, fmt.Sprintf("following:%d", userID), followerID)
+	pipe.SAdd(ctx, fmt.Sprintf("followers:%d", followerID), userID)
 	if _, err := pipe.Exec(ctx); err != nil {
 		return fmt.Errorf("[Repository] redis error updating followers: %w", err)
 	}
@@ -74,8 +74,8 @@ func (r *repository) Unfollow(ctx context.Context, userID, followerID uint) erro
 	}
 
 	pipe := r.redis.TxPipeline()
-	pipe.SRem(ctx, fmt.Sprintf("following:%d", followerID), userID)
-	pipe.SRem(ctx, fmt.Sprintf("followers:%d", userID), followerID)
+	pipe.SRem(ctx, fmt.Sprintf("following:%d", userID), followerID)
+	pipe.SRem(ctx, fmt.Sprintf("followers:%d", followerID), userID)
 	if _, err := pipe.Exec(ctx); err != nil {
 		return fmt.Errorf("[Repository] redis error updating followers: %w", err)
 	}

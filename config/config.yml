@@ -6,6 +6,7 @@ db:
     password: ""
     db: 0
   postgres:
+    addr: postgres:5432
     dsn: "host=postgres user=admin password=admin123 dbname=db port=5432 sslmode=disable"
 
 env: "development"

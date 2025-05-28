@@ -5,6 +5,7 @@ import (
 	"twitter-api/cmd/http"
 	"twitter-api/internal/clients/sql"
 	"twitter-api/internal/config"
+	"twitter-api/internal/feeds"
 	"twitter-api/internal/tweets"
 	"twitter-api/internal/users"
 )
@@ -23,6 +24,10 @@ func main() {
 	tweetsRepository := tweets.NewRepository(postgresClient, redis)
 	tweetsService := tweets.NewService(tweetsRepository)
 	tweetsHandler := tweets.NewHandler(tweetsService)
+
+	feedsRepository := feeds.NewRepository(redis)
+	feedsService := feeds.NewService(feedsRepository)
+	go feedsService.CreateFeeds()
 
 	httpServer := http.NewServer(engine, usersHandler, tweetsHandler)
 	httpServer.Run(cfg.Port)

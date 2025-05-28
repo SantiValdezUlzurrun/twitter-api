@@ -12,6 +12,7 @@ import (
 type Repository interface {
 	Create(ctx context.Context, tweet *models.Tweet) (*models.Tweet, error)
 	Delete(ctx context.Context, id uint) error
+	GetFeed(ctx context.Context, id uint) (*models.Tweet, error)
 }
 
 type repository struct {
@@ -37,6 +38,9 @@ func (r *repository) Create(ctx context.Context, tweet *models.Tweet) (*models.T
 
 func (r *repository) Delete(ctx context.Context, id uint) error {
 	tweet, err := r.sqlClient.GetTweet(ctx, id)
+	if err != nil {
+		return fmt.Errorf("[Repository] Error deleting tweet: %w", err)
+	}
 
 	err = r.sqlClient.DeleteTweet(ctx, tweet)
 	if err != nil {
@@ -51,20 +55,36 @@ func (r *repository) Delete(ctx context.Context, id uint) error {
 	return nil
 }
 
+func (r *repository) GetFeed(ctx context.Context, id uint) (*models.Tweet, error) {
+
+	feedKey := fmt.Sprintf("feed:%d", id)
+
+	tweetID, err := r.redis.LPop(ctx, feedKey).Uint64()
+	if err != nil {
+		return nil, fmt.Errorf("[Repository] error getting feed: %w", err)
+	}
+
+	tweet, err := r.sqlClient.GetTweet(ctx, uint(tweetID))
+	if err != nil {
+		return nil, fmt.Errorf("[Repository] error getting feed: %w", err)
+	}
+	return tweet, nil
+}
+
 func (r *repository) redisDeleteTweet(ctx context.Context, tweet *models.Tweet) error {
-	tweetKey := fmt.Sprintf("tweet:%s", tweet.ID)
-	timelineKey := fmt.Sprintf("timeline:%s", tweet.UserID)
+	tweetKey := fmt.Sprintf("tweet:%d", tweet.ID)
+	feedKey := fmt.Sprintf("feed:%d", tweet.UserID)
 
 	pipe := r.redis.Pipeline()
 	pipe.Del(ctx, tweetKey)
-	pipe.ZRem(ctx, timelineKey, tweet.ID)
+	pipe.ZRem(ctx, feedKey, tweet.ID)
 
 	_, err := pipe.Exec(ctx)
 	return err
 }
 
 func (r *repository) cacheTweet(ctx context.Context, tweet *models.Tweet) error {
-	tweetKey := fmt.Sprintf("tweets:%s", tweet.ID)
+	tweetKey := fmt.Sprintf("tweets:%d", tweet.ID)
 
 	tweetData, err := newTweet(tweet)
 	if err != nil {

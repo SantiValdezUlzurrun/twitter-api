@@ -37,4 +37,5 @@ func (s *Server) registerRoutes() {
 	tweetsRouter := s.engine.Group("/tweets")
 	tweetsRouter.POST("/", s.tweetsHandler.Create)
 	tweetsRouter.DELETE("/:id", s.tweetsHandler.Delete)
+	tweetsRouter.GET("/feed/:id", s.tweetsHandler.GetFeed)
 }

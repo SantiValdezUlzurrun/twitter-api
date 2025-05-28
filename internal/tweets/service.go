@@ -9,6 +9,7 @@ import (
 type Service interface {
 	Create(ctx context.Context, tweetDTO *dto.CreateTweet) (*dto.Tweet, error)
 	Delete(ctx context.Context, id uint) error
+	GetFeed(ctx context.Context, id uint) (*dto.Tweet, error)
 }
 
 type tweetsService struct {
@@ -36,4 +37,12 @@ func (s *tweetsService) Create(ctx context.Context, tweetDTO *dto.CreateTweet) (
 
 func (s *tweetsService) Delete(ctx context.Context, id uint) error {
 	return s.repo.Delete(ctx, id)
+}
+
+func (s *tweetsService) GetFeed(ctx context.Context, id uint) (*dto.Tweet, error) {
+	tweet, err := s.repo.GetFeed(ctx, id)
+	if err != nil {
+		return nil, err
+	}
+	return tweet.ToDTO(), nil
 }
